@@ -94,7 +94,7 @@ use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
 // Set up the update checker
 $myUpdateChecker = PucFactory::buildUpdateChecker(
-    'https://github.com/your-github-username/your-repo-name/', // GitHub repository URL
+    'https://github.com/afsanaghar/post-filter-by-afsanaghar.git', // GitHub repository URL
     __FILE__, // Path to the main plugin file
     'elementor-post-filter' // Plugin slug (must match the folder name)
 );
