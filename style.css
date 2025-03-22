@@ -41,3 +41,65 @@
 #epf-filter-form button[type="reset"]:hover {
     background: #999;
 }
+
+/* Filter Results Container */
+#epf-filter-results {
+    margin-top: 20px;
+}
+
+/* Individual Post Items */
+.epf-post-item {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #f9f9f9;
+}
+
+.epf-post-item h2 {
+    margin: 0 0 10px;
+    font-size: 20px;
+    color: #333;
+}
+
+.epf-post-item div {
+    font-size: 14px;
+    color: #666;
+}
+
+/* Load More Button */
+#epf-load-more {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    background: #0073aa;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease;
+}
+
+#epf-load-more:hover {
+    background: #005177;
+}
+
+#epf-load-more:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #epf-filter-form {
+        flex-direction: column;
+    }
+
+    #epf-filter-form input,
+    #epf-filter-form select,
+    #epf-filter-form button {
+        width: 100%;
+        flex: 1 1 auto;
+    }
+}
