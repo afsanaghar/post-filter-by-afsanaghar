@@ -1,0 +1,43 @@
+/* Filter Form Container */
+#epf-filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+/* Input Fields and Dropdowns */
+#epf-filter-form input,
+#epf-filter-form select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    flex: 1 1 200px; /* Flexible width, minimum 200px */
+}
+
+/* Buttons */
+#epf-filter-form button {
+    padding: 10px 20px;
+    background: #0073aa;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease;
+}
+
+#epf-filter-form button:hover {
+    background: #005177;
+}
+
+/* Reset Button */
+#epf-filter-form button[type="reset"] {
+    background: #ccc;
+    color: #000;
+}
+
+#epf-filter-form button[type="reset"]:hover {
+    background: #999;
+}
