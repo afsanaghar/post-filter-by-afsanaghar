@@ -22,11 +22,9 @@ function epf_load_textdomain() {
 }
 add_action('plugins_loaded', 'epf_load_textdomain');
 
+// Enqueue scripts and styles
 function epf_enqueue_scripts() {
-    // Enqueue CSS
     wp_enqueue_style('epf-style', EPF_PLUGIN_URL . 'assets/css/style.css', array(), EPF_VERSION);
-
-    // Enqueue JS
     wp_enqueue_script('epf-script', EPF_PLUGIN_URL . 'assets/js/script.js', array('jquery'), EPF_VERSION, true);
 
     // Localize script for translations and AJAX URL
@@ -38,38 +36,83 @@ function epf_enqueue_scripts() {
 }
 add_action('wp_enqueue_scripts', 'epf_enqueue_scripts');
 
+// Filter form shortcode
 function epf_filter_form() {
-    ob_start(); // Start output buffering
+    ob_start();
     ?>
     <form id="epf-filter-form">
         <input type="text" name="search" placeholder="<?php _e('Search...', 'elementor-post-filter'); ?>">
         <select name="category">
             <option value=""><?php _e('All Categories', 'elementor-post-filter'); ?></option>
             <?php
-            $categories = get_categories(); // Get all WordPress categories
+            $categories = get_categories();
             foreach ($categories as $category) {
                 echo '<option value="' . $category->term_id . '">' . $category->name . '</option>';
             }
             ?>
         </select>
+        <select name="tag">
+            <option value=""><?php _e('All Tags', 'elementor-post-filter'); ?></option>
+            <?php
+            $tags = get_tags();
+            foreach ($tags as $tag) {
+                echo '<option value="' . $tag->term_id . '">' . $tag->name . '</option>';
+            }
+            ?>
+        </select>
+        <select name="sort">
+            <option value="date_desc"><?php _e('Newest First', 'elementor-post-filter'); ?></option>
+            <option value="date_asc"><?php _e('Oldest First', 'elementor-post-filter'); ?></option>
+            <option value="title_asc"><?php _e('Title (A-Z)', 'elementor-post-filter'); ?></option>
+            <option value="title_desc"><?php _e('Title (Z-A)', 'elementor-post-filter'); ?></option>
+        </select>
         <button type="submit"><?php _e('Filter', 'elementor-post-filter'); ?></button>
         <button type="reset"><?php _e('Reset', 'elementor-post-filter'); ?></button>
     </form>
-    <div id="epf-filter-results"></div> <!-- Results will be displayed here -->
+    <div id="epf-filter-results"></div>
+    <button id="epf-load-more" style="display: none;"><?php _e('Load More', 'elementor-post-filter'); ?></button>
     <?php
-    return ob_get_clean(); // Return the buffered content
+    return ob_get_clean();
 }
-add_shortcode('epf_filter', 'epf_filter_form'); // Register the shortcode [epf_filter]
+add_shortcode('epf_filter', 'epf_filter_form');
 
+// AJAX handler for filtering posts
 function epf_filter_posts() {
+    $search = sanitize_text_field($_POST['search']);
+    $category = intval($_POST['category']);
+    $tag = intval($_POST['tag']);
+    $sort = sanitize_text_field($_POST['sort']);
+    $page = intval($_POST['page']);
+
     $args = array(
-        'post_type' => 'post', // Filter only posts
-        'posts_per_page' => -1, // Show all posts
-        's' => sanitize_text_field($_POST['search']), // Search term
-        'cat' => intval($_POST['category']), // Selected category
+        'post_type' => 'post',
+        'posts_per_page' => 6,
+        'paged' => $page,
+        's' => $search,
+        'cat' => $category,
+        'tag_id' => $tag,
     );
 
-    $query = new WP_Query($args); // Run the query
+    switch ($sort) {
+        case 'date_desc':
+            $args['orderby'] = 'date';
+            $args['order'] = 'DESC';
+            break;
+        case 'date_asc':
+            $args['orderby'] = 'date';
+            $args['order'] = 'ASC';
+            break;
+        case 'title_asc':
+            $args['orderby'] = 'title';
+            $args['order'] = 'ASC';
+            break;
+        case 'title_desc':
+            $args['orderby'] = 'title';
+            $args['order'] = 'DESC';
+            break;
+    }
+
+    $query = new WP_Query($args);
 
     if ($query->have_posts()) {
         while ($query->have_posts()) {
@@ -80,25 +123,16 @@ function epf_filter_posts() {
             echo '</div>';
         }
     } else {
-        echo '<p>' . __('No posts found.', 'elementor-post-filter') . '</p>';
+        echo '<p>' . __('No more posts found.', 'elementor-post-filter') . '</p>';
     }
 
-    wp_die(); // End the AJAX request
+    if ($query->max_num_pages > $page) {
+        echo '<script>jQuery("#epf-load-more").show();</script>';
+    } else {
+        echo '<script>jQuery("#epf-load-more").hide();</script>';
+    }
+
+    wp_die();
 }
-add_action('wp_ajax_epf_filter_posts', 'epf_filter_posts'); // For logged-in users
-add_action('wp_ajax_nopriv_epf_filter_posts', 'epf_filter_posts'); // For non-logged-in users
-
-// Include the Plugin Update Checker library
-require 'plugin-update-checker/plugin-update-checker.php';
-use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
-
-// Set up the update checker
-$myUpdateChecker = PucFactory::buildUpdateChecker(
-    'https://github.com/afsanaghar/post-filter-by-afsanaghar.git', // GitHub repository URL
-    __FILE__, // Path to the main plugin file
-    'elementor-post-filter' // Plugin slug (must match the folder name)
-);
-
-// Optional: Set the branch for updates (default is 'main' or 'master')
-$myUpdateChecker->setBranch('main');
-
+add_action('wp_ajax_epf_filter_posts', 'epf_filter_posts');
+add_action('wp_ajax_nopriv_epf_filter_posts', 'epf_filter_posts');
